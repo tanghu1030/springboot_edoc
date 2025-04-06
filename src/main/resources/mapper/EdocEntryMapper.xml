@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.th.mapper.EdocEntryMapper">
+    <resultMap id="edocEntryMapperMap" type="edocEntry">
+        <id property="id" column="id" />
+        <result property="categoryId" column="categoryId" />
+        <result property="title" column="title" />
+        <result property="summary" column="summary" />
+        <result property="uploaduser" column="uploaduser" />
+        <result property="createdate" column="createdate" />
+<!--        <association property="edocCategory" column="categoryId"  select="com.th.mapper.EdocCategoryMapper.findById" />-->
+        <association property="edocCategory" javaType="edocCategory" >
+            <id property="id" column="cid"/>
+            <result property="name" column="cname" />
+        </association>
+    </resultMap>
+
+    <sql id="baseColumn">
+        id,categoryId,title,summary,uploaduser,createdate
+    </sql>
+
+    <sql id="insertColumn">
+        null,#{categoryId},#{title},#{summary},#{uploaduser},#{createdate}
+    </sql>
+
+    <sql id="setColumn">
+        <if test="categoryId!=null">categoryId=#{categoryId},</if>
+        <if test="title!=null and title.trim().length()>0">title=#{title},</if>
+        <if test="summary!=null and summary.trim().length()>0">summary=#{summary},</if>
+        <if test="uploaduser!=null and uploaduser.trim().length()>0">uploaduser=#{uploaduser},</if>
+        <!-- createdate是Date类型没有trim()方法-->
+        <if test="createdate!=null">createdate=#{createdate}</if>
+    </sql>
+
+    <sql id="conditionColumn">
+        <if test="categoryId!=null and categoryId!=-1">and categoryId=#{categoryId}</if>
+        <if test="title!=null and title.trim().length()>0"><![CDATA[and title like concat('%',#{title},'%')]]></if>
+        <if test="summary!=null and summary.trim().length()>0">and summary=#{summary}</if>
+        <if test="uploaduser!=null and uploaduser.trim().length()>0">and uploaduser=#{uploaduser}</if>
+        <if test="createdate!=null">and  <![CDATA[createdate >=  #{createdate}]]></if>
+        <if test="enddate!=null">and  <![CDATA[createdate <=  #{enddate}]]></if>
+
+    </sql>
+
+    <select id="findAll" resultMap="edocEntryMapperMap">
+        SELECT <include refid="baseColumn" /> FROM edoc_entry
+    </select>
+
+    <select id="findById" parameterType="long" resultMap="edocEntryMapperMap">
+        SELECT <include refid="baseColumn" /> FROM edoc_entry
+        <where>
+            id=#{id}
+        </where>
+    </select>
+
+    <select id="findByCondition" parameterType="edocEntryCondition" resultMap="edocEntryMapperMap">
+        SELECT entry.id,categoryId,title,summary,uploaduser,createdate,category.id cid,category.name cname
+        FROM edoc_entry entry,edoc_category category
+        <where>
+            entry.categoryId=category.id
+            <include refid="conditionColumn"  />
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="edocEntry" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO edoc_entry(<include refid="baseColumn" />) VALUES(<include refid="insertColumn" />)
+    </insert>
+
+    <update id="update" parameterType="edocEntry">
+        UPDATE edoc_entry
+        <set>
+            <include refid="setColumn"  />
+        </set>
+        <where>
+            id=#{id}
+        </where>
+
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM edoc_entry
+        <where>
+            id=#{id}
+        </where>
+    </delete>
+
+
+
+
+
+
+
+</mapper>

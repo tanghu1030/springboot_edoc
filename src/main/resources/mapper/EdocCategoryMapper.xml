@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.th.mapper.EdocCategoryMapper">
+    <resultMap id="edocCategoryMapperMap" type="edocCategory">
+        <id property="id" column="id"/>
+        <result property="name" column="name" />
+    </resultMap>
+
+    <sql id="baseColumn">
+        id,name
+    </sql>
+
+    <sql id="conditionColumn">
+        <if test="id!=null">id=#{id}</if>
+        <if test="name!=null and name.trim().length()>0">and name=#{name}</if>
+    </sql>
+
+    <select id="findAll" resultMap="edocCategoryMapperMap">
+        SELECT <include refid="baseColumn" /> FROM edoc_category
+    </select>
+
+    <select id="findById" parameterType="long" resultMap="edocCategoryMapperMap">
+        SELECT <include refid="baseColumn" /> FROM edoc_category
+        <where>
+            id=#{id}
+        </where>
+    </select>
+
+    <select id="findByCondition" parameterType="edocCategory" resultMap="edocCategoryMapperMap">
+        SELECT <include refid="baseColumn" /> FROM edoc_category
+        <where>
+            <include refid="conditionColumn"  />
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="edocCategory" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO edoc_category(name) VALUES(#{name})
+    </insert>
+
+    <update id="update" parameterType="edocCategory">
+        UPDATE edoc_category
+        <set>
+            <include refid="conditionColumn"  />
+        </set>
+        <where>
+            id=#{id}
+        </where>
+
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM edoc_category
+        <where>
+            id=#{id}
+        </where>
+    </delete>
+
+
+
+
+</mapper>
